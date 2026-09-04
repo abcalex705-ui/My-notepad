@@ -1,9 +1,18 @@
 {
-  "name": "নোটপ্যাড",
+  "name": "নোটপ্যাড অ্যাপ",
   "short_name": "নোটপ্যাড",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
-  "icons": []
+  "description": "A dark-themed personal notepad with folder categorization and task management.",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

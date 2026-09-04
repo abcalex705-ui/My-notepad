@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>নোটপ্যাড</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            color: #87CEEB; /* Skyblue */
+            margin-bottom: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .section {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        h3 {
+            color: #87CEEB;
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        select, input[type="text"], textarea {
+            width: 100%;
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        select:focus, input[type="text"]:focus, textarea:focus {
+            border-color: #87CEEB;
+        }
+        textarea {
+            height: 120px;
+            resize: none;
+        }
+        button {
+            background-color: #87CEEB;
+            color: #121212;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #2c2c2c;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            color: #d3d3d3; /* Ash */
+        }
+        .task-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>নোটপ্যাড</h2>
+
+        <!-- ফোল্ডার ও নোট সেকশন -->
+        <div class="section">
+            <h3>ফোল্ডার ও নোট</h3>
+            <select id="folderSelect">
+                <option value="personal">Personal (ব্যক্তিগত)</option>
+                <option value="study">Study (পড়াশোনা)</option>
+                <option value="work">Work (জরুরি কাজ)</option>
+            </select>
+            <textarea id="noteBox" placeholder="আপনার নোট এখানে লিখুন..."></textarea>
+            <button onclick="saveNoteData()">নোট সেভ করুন</button>
+        </div>
+
+        <!-- টাস্ক সেকশন -->
+        <div class="section">
+            <h3>আজকের টাস্ক</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="textid" id="taskInput" placeholder="নতুন টাস্ক লিখুন..." style="margin-bottom: 0;">
+                <button onclick="addTask()" style="width: 30%;">যোগ করুন</button>
+            </div>
+            <ul id="taskList" class="task-list" style="margin-top: 15px;">
+                <!-- টাস্কগুলো এখানে যোগ হবে -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const folderSelect = document.getElementById('folderSelect');
+        const noteBox = document.getElementById('noteBox');
+        const taskInput = document.getElementById('taskInput');
+        const taskList = document.getElementById('taskList');
+
+        // ফোল্ডার পরিবর্তন করলে ওই ফোল্ডারের নোট লোড করা
+        folderSelect.addEventListener('change', function() {
+            const folder = folderSelect.value;
+            noteBox.value = localStorage.getItem('note_' + folder) || '';
+        });
+
+        // পেজ লোড হলে ডিফল্ট ফোল্ডারের নোট ও টাস্ক লোড করা
+        window.addEventListener('load', function() {
+            noteBox.value = localStorage.getItem('note_personal') || '';
+            loadTasks();
+        });
+
+        // নোট সেভ করার ফাংশন
+        function saveNoteData() {
+            const folder = folderSelect.value;
+            localStorage.setItem('note_' + folder, noteBox.value);
+            alert('নোট সেভ হয়েছে!');
+        }
+
+        // নোট লেখার সাথে সাথে অটো সেভ
+        noteBox.addEventListener('input', function() {
+            const folder = folderSelect.value;
+            localStorage.setItem('note_' + folder, noteBox.value);
+        });
+
+        // টাস্ক যোগ করার ফাংশন
+        function addTask() {
+            const taskText = taskInput.value.trim();
+            if (taskText === '') return;
+
+            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+            tasks.push({ text: taskText, completed: false });
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
+            
+            taskInput.value = '';
+            loadTasks();
+        }
+
+        // টাস্ক লোড করার ফাংশন
+        function loadTasks() {
+            taskList.innerHTML = '';
+            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+
+            tasks.forEach((task, index) => {
+                if (!task.completed) {
+                    const li = document.createElement('li');
+                    li.className = 'task-item';
+                    li.innerHTML = `
+                        <span>${task.text}</span>
+                        <input type="checkbox" onclick="completeTask(${index})">
+                    `;
+                    taskList.appendChild(li);
+                }
+            });
+        }
+
+        // টাস্ক কমপ্লিট করে লিস্ট থেকে মুছে ফেলা
+        function completeTask(index) {
+            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+            tasks[index].completed = true;
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
+            loadTasks();
+        }
+    </script>
+
+</body>
+</html>
